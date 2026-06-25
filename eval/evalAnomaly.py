@@ -99,7 +99,6 @@ def main():
     for path in glob.glob(os.path.expanduser(str(args.input[0]))):
         print(f"Processing: {os.path.basename(path)}")
 
-        # QUI ERA L'ERRORE: Ho tolto il .permute() che sfalsava le dimensioni!
         images = input_transform((Image.open(path).convert('RGB'))).unsqueeze(0).float().cuda()
 
         with torch.no_grad():
