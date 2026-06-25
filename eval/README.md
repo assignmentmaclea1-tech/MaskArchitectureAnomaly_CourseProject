@@ -13,7 +13,8 @@ It could work with the default runtime of Colab or other versions of the librari
 
 ## Anomaly Inference:
 
-* Anomaly Inference Command: '''python evalAnomaly.py --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly21/images/*.png" '''.
+* Anomaly Inference Command:
+  '''python evalAnomaly.py --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly21/images/*.png" '''.
 * Change the paths accordingly.
 
 ## Functions for evaluating/visualizing the network's output
