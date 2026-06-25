@@ -1,3 +1,4 @@
+#The results are summarized in results.txt
 import sys
 import os
 import cv2
