@@ -46,6 +46,20 @@ This code is based on the previous evalAnomaly_original.py. The key change here 
   ```
 * Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy".
 
+## evalAnomaly_eomt.py
+
+This code adapt evalAnomaly.py to use EoMT pretrained model.
+
+**Examples of Inference Command:**
+  ```
+  python evalAnomaly_eomt.py \
+  --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly21/images/*.png" \
+  --ckpt_path "/content/drive/MyDrive/MaskArchitectureAnomaly_CourseProject-main/trained_models/eomt_cityscapes.bin" \
+  --config "/content/MaskArchitectureAnomaly_CourseProject/eomt/configs/dinov2/cityscapes/semantic/eomt_base_640.yaml" \
+  --post_hoc "MSP"
+  ```
+* Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy", "RbA".
+
 **Note:** most of files in this folder isn't useful, maybe can be discarded.
 
 
