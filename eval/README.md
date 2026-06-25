@@ -46,6 +46,6 @@ This code is based on the previous evalAnomaly_original.py. The key change here 
   ```
 * Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy".
 
-
+**Note:** most of files in this folder isn't useful, maybe can be discarded.
 
 
