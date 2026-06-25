@@ -1,6 +1,6 @@
 # Anomaly Segmentation Eval
 
-In this folder you can find some functions to evaluate your model's output. It is designed to load the ERFNet checkpoint so you need to change it when evaluating the EoMT model. The main function to look for is evalAnomaly.py that produces the Anomaly Segmentation results. Other functions could be useful for extensions.
+In this folder you can find some functions to evaluate your model's output. It is designed to load the ERFNet checkpoint so you need to change it when evaluating the EoMT model. The main function to look for is evalAnomaly.py that produces the Anomaly Segmentation results.
 
 ## Requirements:
 
@@ -13,7 +13,9 @@ It could work with the default runtime of Colab or other versions of the librari
 
 ## Anomaly Inference:
 
-* Anomaly Inference Command:```python evalAnomaly.py --input '/home/amarinai/segmentation/unk-dataset/RoadAnomaly21/images/*.png```. Change the dataset path ```'/home/amarinai/segmentation/unk-dataset/RoadAnomaly21/images/*.png```accordingly.
+* Anomaly Inference Command:
+* '''python evalAnomaly.py --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly21/images/*.png" '''.
+* Change the paths accordingly.
 
 ## Functions for evaluating/visualizing the network's output
 
