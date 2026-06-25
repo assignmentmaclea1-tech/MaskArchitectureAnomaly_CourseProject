@@ -1,4 +1,4 @@
-#This script is based on the original evalAnomaly.py (now evalAnomaly.py in this folder). The key changes here are the introduction
+#This script is based on the original evalAnomaly.py (now evalAnomaly_original.py in this folder). The key changes here are the introduction
 # Max Logit and Max Entropy as post-hoc methods.
 import os
 import cv2
