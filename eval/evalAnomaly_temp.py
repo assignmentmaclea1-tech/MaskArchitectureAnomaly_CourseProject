@@ -52,7 +52,6 @@ def main():
     parser.add_argument('--cpu', action='store_true')
     parser.add_argument('--post_hoc', default="MSP", choices=["MSP", "MaxLogit", "MaxEntropy"])
 
-    # ECCO IL PARAMETRO MANCANTE: Ora accetterà --temperature
     parser.add_argument('--temperature', type=float, default=1.0, help="Forza la temperatura (es. 0.5)")
     args = parser.parse_args()
 
@@ -81,10 +80,8 @@ def main():
 
     model = load_my_state_dict(model, torch.load(weightspath, map_location=lambda storage, loc: storage))
 
-    # Avvolgiamo il modello
     model = ModelWithTemperature(model)
 
-    # Forziamo la temperatura al valore che passi dal comando
     model.temperature.data = torch.tensor([args.temperature]).cuda()
 
     print("Model, Weights and GitHub Temperature Scaling LOADED successfully")
