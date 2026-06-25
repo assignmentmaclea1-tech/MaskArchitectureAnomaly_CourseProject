@@ -61,5 +61,6 @@ This code adapt evalAnomaly.py to use EoMT pretrained model.
 * Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy", "RbA".
 
 **Note:** most of files in this folder isn't useful, maybe can be discarded.
+Non so dove prendere eomt_cityscapes.bin
 
 
