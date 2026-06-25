@@ -1,6 +1,6 @@
 #COMMENT
 #In the original Colab, evalAnomaly.py was overwritten, here I created a new file .py for the Temperature Scaling Task.
-
+#The results are summarized in results.txt
 import os
 import cv2
 import glob
