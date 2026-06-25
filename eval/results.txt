@@ -1,0 +1,181 @@
+model:Erfnet, EoMT
+post_hoc method: MSP, MaxLogit, MaxEntropy, RbA (only for EoMT)
+Dataset: SMIYC RA-21, SMIYC RO-21, FS L&F,  FS Static, Road Anomaly
+Metrics: AuPRC, FPR95
+
+SMIYC RA-21:{
+  ErfNet:{
+    MSP:{
+      AuPRC: 29.10
+      FPR95: 62.55
+    }
+    MaxLogit:{
+      AuPRC: 38.32
+      FPR95: 59.34
+    }
+    MaxEntropy:{
+      AuPRC: 30.97
+      FPR95: 62.66
+    }
+}
+  EoMT:{
+    MSP:{
+      AuPRC: 66.26
+      FPR95: 19.83
+    }
+    MaxLogit:{
+      AuPRC: 66.30
+      FPR95: 19.58
+    }
+    MaxEntropy:{
+      AuPRC: 69.25
+      FPR95: 19.45
+    }
+    RbA:{
+      AuPRC: 67.75
+      FRP95: 18.28
+    }
+  }
+}
+
+SMIYC RO-21:{
+  ErfNet:{
+    MSP:{
+      AuPRC: 2.71
+      FPR95: 65.22
+    }
+    MaxLogit:{
+      AuPRC: 4.63
+      FPR95: 48.44
+    }
+    MaxEntropy:{
+      AuPRC: 3.04
+      FPR95: 65.91
+    }
+}
+  EoMT:{
+    MSP:{
+      AuPRC: 83.39
+      FPR95: 6.78
+    }
+    MaxLogit:{
+      AuPRC: 83.13
+      FPR95: 8.95
+    }
+    MaxEntropy:{
+      AuPRC: 83.08
+      FPR95: 19.98
+    }
+    RbA:{
+      AuPRC: 89.18
+      FRP95: 2.78
+    }
+  }
+}
+
+FS L&F:{
+  ErfNet:{
+    MSP:{
+      AuPRC: 1.75  
+      FPR95: 50.59
+    }
+    MaxLogit:{
+      AuPRC: 3.30
+      FPR95: 45.49
+    }
+    MaxEntropy:{
+      AuPRC: 2.58
+      FPR95: 50.06
+    }
+}
+  EoMT:{
+    MSP:{
+      AuPRC: 17.97
+      FPR95: 43.33
+    }
+    MaxLogit:{
+      AuPRC: 17.47
+      FPR95: 44.10
+    }
+    MaxEntropy:{
+      AuPRC: 19.23
+      FPR95: 41.15
+    }
+    RbA:{
+      AuPRC: 13.57
+      FRP95: 54.12
+    }
+  }
+}
+
+FS Static:{
+  ErfNet:{
+    MSP:{
+      AuPRC: 7.97
+      FPR95: 41.89
+    }
+    MaxLogit:{
+      AuPRC: 9.50
+      FPR95: 40.30
+    }
+    MaxEntropy:{
+      AuPRC: 8.84
+      FPR95: 41.35
+    }
+}
+  EoMT:{
+    MSP:{
+      AuPRC: 61.16
+      FPR95: 33.28
+    }
+    MaxLogit:{
+      AuPRC: 61.11
+      FPR95: 34.07
+    }
+    MaxEntropy:{
+      AuPRC: 58.93
+      FPR95: 33.59
+    }
+    RbA:{
+      AuPRC: 39.92
+      FRP95: 35.07
+    }
+  }
+}
+
+Road Anomaly:{
+  ErfNet:{
+    MSP:{
+      AuPRC: 12.91
+      FPR95: 82.58
+    }
+    MaxLogit:{
+      AuPRC: 15.58
+      FPR95: 73.25
+    }
+    MaxEntropy:{
+      AuPRC: 12.67
+      FPR95: 82.75
+    }
+}
+  EoMT:{
+    MSP:{
+      AuPRC: 66.82
+      FPR95: 25.33
+    }
+    MaxLogit:{
+      AuPRC: 66.33
+      FPR95: 25.23
+    }
+    MaxEntropy:{
+      AuPRC: 69.75
+      FPR95: 24.53
+    }
+    RbA:{
+      AuPRC: 67.24
+      FRP95: 29.23
+    }
+  }
+}
+
+

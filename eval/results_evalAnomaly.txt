@@ -1,6 +1,0 @@
-model:Erfnet
-post_hoc method: MSP, MaxLogit, MaxEntropy
-Dataset: SMIYC RA-21, SMIYC RO-21, FS L&F,  FS Static, Road Anomaly
-Metrics: AuPRC, FPR95
-
-
