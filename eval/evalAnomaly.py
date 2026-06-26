@@ -19,6 +19,19 @@ from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_curv
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 import torch.nn.functional as F
 
+'''
+"""
+Questo script esegue la valutazione di anomalie (out-of-distribution, OOD) utilizzando un modello di segmentazione ERFNet pre-addestrato.
+Lo script prende in input immagini, applica il modello per ottenere la segmentazione semantica e converte le uscite della rete in mappe 
+di anomalie pixel-wise usando metodi post-hoc come MSP (Maximum Softmax Probability), MaxLogit e MaxEntropy.
+Successivamente confronta le mappe di anomalie predette con le maschere ground-truth di diversi dataset 
+(ad esempio RoadAnomaly, LostAndFound e StreetHazard), calcola metriche di valutazione come AUPRC e FPR@95TPR e 
+salva i risultati in un file di testo.
+
+L’obiettivo principale è misurare la capacità del modello di rilevare oggetti anomali o sconosciuti in scene stradali reali.
+"""
+'''
+
 seed = 42
 
 random.seed(seed)
@@ -45,6 +58,16 @@ target_transform = Compose(
 )
 
 def main():
+    '''
+    def main():
+    """
+    Carica un modello ERFNet pre-addestrato, elabora un insieme di immagini e 
+    calcola mappe di anomalie pixel-wise utilizzando un metodo post-hoc selezionato (MSP, MaxLogit o MaxEntropy).
+    Per ogni immagine, genera i logits della segmentazione, li converte in punteggi di anomalia 
+    e li confronta con le maschere ground-truth OOD.
+    Infine valuta le prestazioni del modello tramite metriche come AUPRC e FPR@95TPR e salva i risultati su file.
+    """
+    '''
     parser = ArgumentParser()
     parser.add_argument(
         "--input",
