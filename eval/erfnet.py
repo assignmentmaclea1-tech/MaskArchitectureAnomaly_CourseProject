@@ -2,7 +2,16 @@
 # Sept 2017
 # Eduardo Romera
 #######################
+'''
+Questo codice implementa ERFNet (Efficient Residual Factorized Network), una rete neurale convoluzionale progettata per la 
+segmentazione semantica in tempo reale. 
+L'obiettivo della rete è assegnare una classe a ogni pixel dell'immagine, ad esempio distinguendo strada, auto, pedoni, edifici, ecc.
 
+L'architettura segue il paradigma Encoder–Decoder:
+
+Encoder: estrae le caratteristiche dell'immagine riducendone progressivamente la risoluzione.
+Decoder: ricostruisce la risoluzione originale producendo una mappa di segmentazione.
+'''
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -10,7 +19,18 @@ import torch.nn.functional as F
 
 
 class DownsamplerBlock (nn.Module):
+    '''
+    Questo blocco riduce la dimensione spaziale delle feature map (downsampling) e 
+    contemporaneamente aumenta il numero di canali.
+    I risultati della convoluzione e del max pooling vengono concatenati sui canali, 
+    normalizzati con BatchNorm e passati attraverso una funzione ReLU
+    
+    '''
     def __init__(self, ninput, noutput):
+        '''
+        Inizializza il blocco di downsampling, dove ninput e noutput rappresentano il numero di canali in input e di output.
+        Viene applicata una convoluzione con kernel 3x3, stride 2 e padding 1.
+        '''
         super().__init__()
 
         self.conv = nn.Conv2d(ninput, noutput-ninput, (3, 3), stride=2, padding=1, bias=True)
@@ -24,6 +44,13 @@ class DownsamplerBlock (nn.Module):
     
 
 class non_bottleneck_1d (nn.Module):
+    '''
+    Viene implementato un blocco residuo composto da convoluzioni 3×1 e 1×3, sostituendo le tradizionali convoluzioni 3×3 
+    per ridurre il numero di parametri. Il blocco include Batch Normalization, ReLU, convoluzioni dilatate 
+    per ampliare il campo recettivo e una connessione residua che facilita la propagazione del gradiente durante l'addestramento.
+    Da notare poi la funzione .dropout che durante l'addestramento disattiva casualmente alcuni neuroni per ridurre l'overfitting.
+    
+    '''
     def __init__(self, chann, dropprob, dilated):        
         super().__init__()
 
@@ -62,6 +89,12 @@ class non_bottleneck_1d (nn.Module):
 
 
 class Encoder(nn.Module):
+    '''
+    Questo blocco costituisce la parte di codifica della rete. Riduce progressivamente la risoluzione dell'immagine mediante 
+    blocchi di downsampling ed  estrae caratteristiche sempre più rappresentative attraverso blocchi residuali 
+    con convoluzioni standard e dilatate. Tramite 'predict' può produrre direttamente i logits di classe tramite una 
+    convoluzione finale 1×1.
+    '''
     def __init__(self, num_classes):
         super().__init__()
         self.initial_block = DownsamplerBlock(3,16)
@@ -97,6 +130,11 @@ class Encoder(nn.Module):
 
 
 class UpsamplerBlock (nn.Module):
+    '''
+    Questo blocco aumenta la risoluzione delle feature map mediante una convoluzione trasposta (transposed convolution), 
+    seguita da Batch Normalization e funzione di attivazione ReLU. 
+    Questo blocco consente di ricostruire gradualmente i dettagli spaziali persi durante la fase di codifica.
+    '''
     def __init__(self, ninput, noutput):
         super().__init__()
         self.conv = nn.ConvTranspose2d(ninput, noutput, 3, stride=2, padding=1, output_padding=1, bias=True)
@@ -108,6 +146,11 @@ class UpsamplerBlock (nn.Module):
         return F.relu(output)
 
 class Decoder (nn.Module):
+    '''
+    Questo blocco rappresenta la fase di decodifica della rete. Attraverso blocchi di upsampling e blocchi residuali 
+    ricostruisce progressivamente la risoluzione originale delle feature map fino a produrre una mappa di segmentazione 
+    con un canale per ciascuna classe.
+    '''
     def __init__(self, num_classes):
         super().__init__()
 
@@ -135,7 +178,13 @@ class Decoder (nn.Module):
 
 
 class ERFNet(nn.Module):
-    def __init__(self, num_classes, encoder=None):  #use encoder to pass pretrained encoder
+    '''
+    Il blocco definisce l'architettura completa della rete, composta da un encoder e un decoder. Durante il forward, 
+    l'immagine viene prima codificata per estrarne le caratteristiche principali e successivamente decodificata 
+    per ottenere la mappa di segmentazione finale. 
+    La rete può essere utilizzata anche in modalità "encoder only", restituendo direttamente la predizione dell'encoder.
+    '''
+    def __init__(self, num_classes, encoder=None):  #usa encoder pre-addestrato se disponible
         super().__init__()
 
         if (encoder == None):
