@@ -106,6 +106,12 @@ def main():
         model = torch.nn.DataParallel(model).cuda()
 
     def load_my_state_dict(model, state_dict):
+        '''
+        Funzione che carica manualmente i pesi di un modello PyTorch da un dizionario di stato (state_dict).
+        Gestisce anche il caso in cui il modello sia stato salvato con DataParallel (prefisso "module."), rimuovendolo se necessario.
+        I parametri corrispondenti vengono copiati nel modello corrente, mentre quelli non trovati vengono ignorati e segnalati.
+        Alla fine restituisce il modello aggiornato con i pesi caricati.
+        '''
         own_state = model.state_dict()
         for name, param in state_dict.items():
             if name not in own_state:
@@ -151,6 +157,15 @@ def main():
         mask = Image.open(pathGT)
         mask = target_transform(mask)
         ood_gts = np.array(mask)
+
+        '''
+        Questi blocchi if convertono le etichette ground truth dei diversi dataset 
+        in una rappresentazione binaria uniforme per la valutazione OOD.
+        Il risultato finale è una maschera in cui:
+        - 1 indica pixel appartenenti a classi anomale (out-of-distribution)
+        - 0 indica pixel in-distribution
+        - 255 indica pixel ignorati e quindi esclusi dalla valutazione delle metriche
+        '''
 
         if "RoadAnomaly" in pathGT:
              ood_gts = np.where((ood_gts==2), 1, ood_gts)
