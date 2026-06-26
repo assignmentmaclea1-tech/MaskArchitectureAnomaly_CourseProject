@@ -63,4 +63,19 @@ This code adapt evalAnomaly.py to use EoMT pretrained model.
 **Note:** most of files in this folder isn't useful, maybe can be discarded.
 Non so dove prendere eomt_cityscapes.bin
 
+## evalAnomaly_temp.py
+
+This code adapt evalAnomaly.py to perform Temperature Scaling.
+
+**Examples of Inference Command:**
+  ```
+  python evalAnomaly_temp.py \
+  --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly/images/*.jpg" \
+  --loadDir "/content/drive/MyDrive/MaskArchitectureAnomaly_CourseProject-main/trained_models/" \
+  --loadWeights "erfnet_pretrained.pth" \
+  --post_hoc "MSP" \
+  --temperature 0.75
+
+  ```
+
 
