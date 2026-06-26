@@ -14,10 +14,11 @@ It could work with the default runtime of Colab or other versions of the librari
 
 ## Functions for evaluating/visualizing the network's output
 
-Three different functions were used to evaluating network output:
+Four different functions were used to evaluating network output:
 - evalAnomaly_original
 - evalAnomaly
 - evalAnomaly_eomt
+- evalAnomaly_temp
 
 
 ## evalAnomaly_original.py
