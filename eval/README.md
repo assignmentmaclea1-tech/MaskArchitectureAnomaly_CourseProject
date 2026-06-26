@@ -48,7 +48,7 @@ This code is based on the previous evalAnomaly_original.py. The key change here 
 
 ## evalAnomaly_eomt.py
 
-This code adapt evalAnomaly.py to use EoMT pretrained model.
+This code adapt evalAnomaly.py to use EoMT pretrained model. The weights for this pretrained model can be downloaded [here](https://drive.google.com/file/d/1Xrglbc8y2izbQjUDmJASTegNWKAotXNp/view?usp=sharing)
 
 **Examples of Inference Command:**
   ```
