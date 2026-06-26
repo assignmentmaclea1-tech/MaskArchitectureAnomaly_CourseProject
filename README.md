@@ -1,5 +1,5 @@
 # Mask Architecture for Road Scenes
-This is the starting repository for Mask Architecture Anomaly Segmentation for Road Scenes (https://file.didattica.polito.it/dl/MATDID/34099213?download)[Project Description]
+This is the starting repository for Mask Architecture Anomaly Segmentation for Road Scenes [Project Description](#https://file.didattica.polito.it/dl/MATDID/34099213?download)
 This repository consists of the code base for training/testing ERFNet on the Cityscapes dataset and perform anomaly segmentation. It also contains some code referring to EoMT. Some of this code may be unnecessary.
 
 ## Folders
