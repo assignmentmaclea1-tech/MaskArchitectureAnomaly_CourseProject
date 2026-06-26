@@ -5,7 +5,9 @@ from torch.nn import functional as F
 '''
 """
 Questo modulo implementa la Temperature Scaling, una tecnica di calibrazione usata per migliorare le prestazioni del classifier.
-La classe incapsula un modello già addestrato e introduce un parametro scalare apprendibile (temperature) che viene 
+Di solito, le reti neurali sono over-confident anche quando sbagliano. La temperature scaling serve per attenuare questo comportamento,
+che risulterebbe decisivo in un contesto come l'Anomaly Detection.
+La classe incapsula un modello già addestrato e introduce un parametro (temperature) che viene 
 usato per ridimensionare i logits in output.
 Nel forward, il modello produce i logits e questi vengono divisi per la temperatura, modificando la “confidenza” 
 delle predizioni senza alterare le classi previste.
