@@ -1,4 +1,7 @@
 #The results are summarized in results.txt
+#DA COMMENTARE
+
+
 import sys
 import os
 import cv2
