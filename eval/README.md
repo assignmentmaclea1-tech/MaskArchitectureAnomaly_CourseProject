@@ -63,7 +63,7 @@ This code adapt evalAnomaly.py to use EoMT pretrained model. The weights for thi
 
 ## evalAnomaly_temp.py
 
-This code adapt evalAnomaly.py to perform Temperature Scaling.
+This code adapt evalAnomaly.py to perform Temperature Scaling. The post-hoc method is "MSP"
 
 **Examples of Inference Command:**
   ```
@@ -75,5 +75,5 @@ This code adapt evalAnomaly.py to perform Temperature Scaling.
   --temperature 0.75
 
   ```
-
+* The values for temperature are 0.5, 0.75, 1.0, 1.1
 
