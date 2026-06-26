@@ -20,6 +20,25 @@ import torch.nn.functional as F
 # Import temperature_scaling
 from temperature_scaling import ModelWithTemperature
 
+'''
+Questo script esegue la valutazione di anomaly detection (OOD) su immagini utilizzando un modello ERFNet, 
+con l’aggiunta della Temperature Scaling per la calibrazione dei logits.
+Il pipeline è simile alla versione originale di evalAnomaly, ma introduce un wrapper (ModelWithTemperature) 
+che modifica le predizioni del modello dividendo i logits per un parametro di temperatura.
+
+Per ogni immagine:
+- viene eseguita la segmentazione tramite ERFNet
+- viene eseguito il wrapper
+- i logits vengono trasformati in probabilità
+- viene calcolato un anomaly score pixel-wise usando metodi post-hoc (MSP, MaxLogit, MaxEntropy)
+- le maschere ground truth vengono convertite in formato binario OOD (0 = in-distribution, 1 = anomalia, 255 = ignorato)
+
+Infine, i risultati vengono aggregati sull’intero dataset e valutati tramite metriche come AUPRC e FPR@95TPR, 
+per misurare la qualità della rilevazione delle anomalie.
+
+Il valore della temperatura può essere fissato manualmente per studiare il suo effetto sulle prestazioni del sistema.
+'''
+
 seed = 42
 random.seed(seed)
 np.random.seed(seed)
