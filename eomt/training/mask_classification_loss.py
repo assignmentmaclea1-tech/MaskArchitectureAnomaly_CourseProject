@@ -70,8 +70,10 @@ class MaskClassificationLoss(Mask2FormerLoss):
     # [LOGITNORM] 2. Override della funzione loss_labels
     def loss_labels(self, class_queries_logits, class_labels, indices):
         # Normalizzazione L2 e divisione per temperatura
+        
         norms = torch.norm(class_queries_logits, p=2, dim=-1, keepdim=True) + 1e-7
         normalized_logits = (class_queries_logits / norms) / self.tau
+        print(f"[LOGITNORM ATTIVO] tau={self.tau}, norm_media={normalized_logits.norm(dim=-1).mean():.2f}")
 
         # Richiamo della funzione originale passando i logits modificati
         return super().loss_labels(normalized_logits, class_labels, indices)
