@@ -169,28 +169,30 @@ def main():
     start = time.time()
 
     for img_tensor, gt_tensor, filename in loader:
-        # img_tensor: [1, 3, H, W] float [0,1]
-        # gt_tensor:  [1, H, W] long
-
-        # EoMT si aspetta uint8 [0,255] con shape [C, H, W], senza batch dim
+        print(f"Immagine: {filename[0]}")
+        print(f"img_tensor shape: {img_tensor.shape}")
+        print(f"gt_tensor shape: {gt_tensor.shape}")
+        print(f"GT valori unici: {gt_tensor.unique()}")
+    
         img_uint8 = (img_tensor.squeeze(0) * 255).to(torch.uint8).to(device)
         imgs = [img_uint8]
         img_sizes = [img_uint8.shape[-2:]]
-
-        # Windowing + forward pass + riassemblaggio crop
+    
         crops, origins = model.window_imgs_semantic(imgs)
         S, L = per_pixel_maps(model, crops, origins, img_sizes, args.temperature)
-        # S: [C, H, W] mappa probabilità per-pixel
-
-        # Argmax su C per ottenere la classe predetta per ogni pixel
-        pred = S.argmax(dim=0).unsqueeze(0).unsqueeze(0)  # [1, 1, H, W]
-
-        # Ridimensiona la GT alla stessa risoluzione dell'output del modello
-        gt = gt_tensor.unsqueeze(1).to(device)  # [1, 1, H, W]
-
+    
+        print(f"S shape: {S.shape}")
+        print(f"S valori unici (primi 5): {S.unique()[:5]}")
+    
+        pred = S.argmax(dim=0).unsqueeze(0).unsqueeze(0)
+        print(f"pred shape: {pred.shape}")
+        print(f"pred valori unici: {pred.unique()}")
+    
+        gt = gt_tensor.unsqueeze(1).to(device)
+        print(f"gt shape: {gt.shape}")
+    
         iouEvalVal.addBatch(pred.data, gt.data)
-
-        print(f"Processata: {filename[0]}")
+        break  # processa solo la prima immagine per il debug
 
         del S, L, crops
         if device == "cuda":
