@@ -95,12 +95,25 @@ def main(args):
         if (not args.cpu):
             images = images.cuda()
             labels = labels.cuda()
-
+        '''
         inputs = Variable(images)
         with torch.no_grad():
             outputs = model(inputs)
-
-        iouEvalVal.addBatch(outputs.max(1)[1].unsqueeze(1).data, labels)
+        '''
+        # 1. Converti l'immagine nel formato atteso da EoMT (uint8, non float normalizzato)
+        img_uint8 = (images.squeeze(0) * 255).to(torch.uint8)
+        imgs = [img_uint8.to(device)]
+        img_sizes = [img_uint8.shape[-2:]]
+        
+        # 2. Windowing + forward + riassembla (la funzione che hai già)
+        crops, origins = model.window_imgs_semantic(imgs)
+        S, L = per_pixel_maps(model, crops, origins, img_sizes, temperature=1.0)
+        
+        # 3. Ricava la classe predetta per ogni pixel (argmax su C)
+        pred = S.argmax(dim=0).unsqueeze(0).unsqueeze(0)  # [1, 1, H, W]
+        
+        # 4. Passa a iouEval esattamente come prima
+        iouEvalVal.addBatch(pred.data, labels.cuda())
 
         #filenameSave = filename[0].split("leftImg8bit/")[1] 
 
