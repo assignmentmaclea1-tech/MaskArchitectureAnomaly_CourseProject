@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, CenterCrop, Normalize, Resize
 from torchvision.transforms import ToTensor, ToPILImage
 
+from temperature_scaling import ModelWithTemperature
 from evalAnomaly_eomt import build_eomt_model
 from transform import Relabel, ToLabel, Colorize
 from iouEval import iouEval, getColorEntry
@@ -72,6 +73,10 @@ def main(args):
     model = load_my_state_dict(model, torch.load(weightspath, map_location=lambda storage, loc: storage))
     print ("Model and weights LOADED successfully")
 
+    model = ModelWithTemperature(model)
+
+    # Forziamo la temperatura al valore che passi dal comando
+    model.temperature.data = torch.tensor([args.temperature]).cuda()
 
     model.eval()
 
