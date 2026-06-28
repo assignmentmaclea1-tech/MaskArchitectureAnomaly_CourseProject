@@ -1,3 +1,4 @@
+'''
 # Code to calculate IoU (mean and per-class) in a dataset
 # Nov 2017
 # Eduardo Romera
@@ -148,3 +149,4 @@ if __name__ == '__main__':
     parser.add_argument('--cpu', action='store_true')
 
     main(parser.parse_args())
+'''
