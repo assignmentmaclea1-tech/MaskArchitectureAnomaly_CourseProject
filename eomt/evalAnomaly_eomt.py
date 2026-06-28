@@ -1,7 +1,7 @@
 #The results are summarized in results.txt
 #DA COMMENTARE: il file è stato creato nella cartella eval ma dopo viene aperta la cartella EoMT. Sposto in eomt?
 
-%%writefile /content/MaskArchitectureAnomaly_CourseProject/eval/evalAnomaly_eomt.py
+#%%writefile /content/MaskArchitectureAnomaly_CourseProject/eval/evalAnomaly_eomt.py
 # Copyright (c) OpenMMLab. All rights reserved.
 
 # ============================================================
