@@ -9,11 +9,11 @@ from PIL import Image
 from argparse import ArgumentParser
 
 from torch.autograd import Variable
+from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, CenterCrop, Normalize, Resize
 from torchvision.transforms import ToTensor, ToPILImage
 
-from dataset import cityscapes
 from evalAnomaly_eomt import build_eomt_model
 from transform import Relabel, ToLabel, Colorize
 from iouEval import iouEval, getColorEntry
@@ -78,15 +78,15 @@ def main(args):
     if(not os.path.exists(args.datadir)):
         print ("Error: datadir could not be loaded")
 
+    dataset = ImageFolder(root=args.input)
 
-    loader = DataLoader(cityscapes(args.datadir, input_transform, target_transform), num_workers=args.num_workers, batch_size=args.batch_size, shuffle=False)
-
+    loader = DataLoader(dataset, num_workers=args.num_workers, batch_size=args.batch_size, shuffle=False)
 
     iouEvalVal = iouEval(NUM_CLASSES)
 
-    start = time.time()
+    #start = time.time()
 
-    for step, (images, labels, filename) in enumerate(loader):
+    for images, labels in loader:
         if (not args.cpu):
             images = images.cuda()
             labels = labels.cuda()
@@ -97,9 +97,9 @@ def main(args):
 
         iouEvalVal.addBatch(outputs.max(1)[1].unsqueeze(1).data, labels)
 
-        filenameSave = filename[0].split("leftImg8bit/")[1] 
+        #filenameSave = filename[0].split("leftImg8bit/")[1] 
 
-        print (step, filenameSave)
+        #print (step, filenameSave)
 
 
     iouVal, iou_classes = iouEvalVal.getIoU()
@@ -109,10 +109,10 @@ def main(args):
         iouStr = getColorEntry(iou_classes[i])+'{:0.2f}'.format(iou_classes[i]*100) + '\033[0m'
         iou_classes_str.append(iouStr)
 
-    print("---------------------------------------")
-    print("Took ", time.time()-start, "seconds")
-    print("=======================================")
-    #print("TOTAL IOU: ", iou * 100, "%")
+    #print("---------------------------------------")
+    #print("Took ", time.time()-start, "seconds")
+    #print("=======================================")
+    print("TOTAL IOU: ", iou * 100, "%")
     print("Per-Class IoU:")
     print(iou_classes_str[0], "Road")
     print(iou_classes_str[1], "sidewalk")
