@@ -19,7 +19,7 @@ from torchvision.transforms import Compose, CenterCrop, Normalize, Resize
 from torchvision.transforms import ToTensor, ToPILImage
 
 from dataset import cityscapes
-from erfnet import ERFNet
+from evalAonomaly_eomt import build_eomt_model
 from transform import Relabel, ToLabel, Colorize
 from iouEval import iouEval, getColorEntry
 
@@ -45,7 +45,7 @@ def main(args):
     print ("Loading model: " + modelpath)
     print ("Loading weights: " + weightspath)
 
-    model = ERFNet(NUM_CLASSES)
+    model = build_eomt_model(config_path, ckpt_path, device)
 
     #model = torch.nn.DataParallel(model)
     if (not args.cpu):
@@ -138,10 +138,11 @@ if __name__ == '__main__':
     parser.add_argument('--state')
 
     parser.add_argument('--loadDir',default="../trained_models/")
-    parser.add_argument('--loadWeights', default="erfnet_pretrained.pth")
-    parser.add_argument('--loadModel', default="erfnet.py")
+    parser.add_argument('--ckpt_path', default="eomt_cityscapes.bin")
+    parser.add_argument('--loadModel', default="evalAnomaly_eomt.py")
+    parser.add_argument('--config, default="eomt_base_640.yaml")
     parser.add_argument('--subset', default="val")  #can be val or train (must have labels)
-    parser.add_argument('--datadir', default="/home/shyam/ViT-Adapter/segmentation/data/cityscapes/")
+    parser.add_argument('--input', default="/home/shyam/ViT-Adapter/segmentation/data/cityscapes/")
     parser.add_argument('--num-workers', type=int, default=4)
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--cpu', action='store_true')
