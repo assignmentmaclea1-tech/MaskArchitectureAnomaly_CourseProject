@@ -33,7 +33,7 @@ target_transform = Compose([
 
 def main(args):
 
-    parser.add_argument('--state')
+    parser = ArgumentParser()
 
     parser.add_argument('--loadDir',default="../trained_models/")##
     parser.add_argument('--ckpt_path', default="eomt_cityscapes.bin")##
@@ -45,6 +45,8 @@ def main(args):
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--cpu', action='store_true')
 
+    args = parser.parse_args()
+
     modelpath = args.loadDir + args.loadModel
     weightspath = args.loadDir + args.loadWeights
 
@@ -52,7 +54,7 @@ def main(args):
     print ("Loading weights: " + weightspath)
 
     model = build_eomt_model(args.config_path, args.ckpt_path, args.device)
-
+    '''
     model = torch.nn.DataParallel(model)
     if (not args.cpu):
         model = torch.nn.DataParallel(model).cuda()
@@ -71,6 +73,7 @@ def main(args):
         return model
 
     model = load_my_state_dict(model, torch.load(weightspath, map_location=lambda storage, loc: storage))
+    '''
     print ("Model and weights LOADED successfully")
 
     model = ModelWithTemperature(model)
