@@ -140,7 +140,7 @@ if __name__ == '__main__':
     parser.add_argument('--loadDir',default="../trained_models/")
     parser.add_argument('--ckpt_path', default="eomt_cityscapes.bin")
     parser.add_argument('--loadModel', default="evalAnomaly_eomt.py")
-    parser.add_argument('--'config_path', default="eomt_base_640.yaml")
+    parser.add_argument('--config_path', default="eomt_base_640.yaml")
     parser.add_argument('--subset', default="val")  #can be val or train (must have labels)
     parser.add_argument('--input', default="/home/shyam/ViT-Adapter/segmentation/data/cityscapes/")
     parser.add_argument('--num-workers', type=int, default=4)
