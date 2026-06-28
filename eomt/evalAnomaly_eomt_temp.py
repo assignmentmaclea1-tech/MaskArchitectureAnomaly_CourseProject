@@ -4,7 +4,7 @@
 #   python evalAnomaly_eomt.py \
 #       --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly21/images/*.png" \
 #       --temperature 1.0
-#
+# Questo codice serve per valutare la Temperature Scaling.
 # Stampa AuPRC e FPR@95 per TUTTI i metodi (MSP, MaxLogit, MaxEntropy, RbA) in un solo forward pass.
 
 import os
