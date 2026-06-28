@@ -1,4 +1,4 @@
-%%writefile /content/MaskArchitectureAnomaly_CourseProject/eomt/evalAnomaly_eomt.py
+#%%writefile /content/MaskArchitectureAnomaly_CourseProject/eomt/evalAnomaly_eomt.py
 # evalAnomaly_eomt.py
 # Anomaly segmentation evaluation for the EoMT (mask architecture) model.
 # Da lanciare DALLA cartella eomt/ (serve per importare models. / training.).
