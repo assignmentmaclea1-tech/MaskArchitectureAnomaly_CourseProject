@@ -1,5 +1,5 @@
 #The results are summarized in results.txt
-#DA COMMENTARE
+#DA COMMENTARE: il file è stato creato nella cartella eval ma dopo viene aperta la cartella EoMT. Sposto in eomt?
 
 
 import sys
