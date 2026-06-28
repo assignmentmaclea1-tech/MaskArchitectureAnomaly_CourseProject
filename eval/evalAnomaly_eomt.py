@@ -1,6 +1,15 @@
 #The results are summarized in results.txt
 #DA COMMENTARE: il file è stato creato nella cartella eval ma dopo viene aperta la cartella EoMT. Sposto in eomt?
 
+%%writefile /content/MaskArchitectureAnomaly_CourseProject/eval/evalAnomaly_eomt.py
+# Copyright (c) OpenMMLab. All rights reserved.
+
+# ============================================================
+# Script di valutazione per il rilevamento di anomalie stradali
+# tramite il modello EoMT (Encoder-only Mask Transformer).
+# Calcola metriche AUPRC e FPR@TPR95 su dataset come
+# RoadAnomaly, RoadObsticle21, LostAndFound, StreetHazards.
+# ============================================================
 
 import sys
 import os
@@ -19,59 +28,100 @@ from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_curv
 from torchvision.transforms import Compose, Resize, ToTensor
 import torch.nn.functional as F
 
+# Aggiunge il path del modulo EoMT al sys.path per poterne importare le classi dinamicamente
 sys.path.append("/content/MaskArchitectureAnomaly_CourseProject/eomt")
 
+
 def fpr_at_95_tpr(confidences, labels):
+    """
+    Calcola il False Positive Rate (FPR) nel punto in cui il True Positive Rate (TPR)
+    raggiunge il 95%. È una metrica standard per la valutazione di rilevatori di anomalie:
+    misura quante predizioni in-distribution vengono erroneamente classificate come OOD
+    quando si identifica correttamente il 95% degli OOD reali.
+    """
     fpr, tpr, _ = roc_curve(labels, confidences)
+    # Trova il primo indice in cui TPR >= 0.95
     idx = np.argmax(tpr >= 0.95)
     return fpr[idx]
 
+
+# --- Riproducibilità: fissa i seed per NumPy, Python e PyTorch ---
 seed = 42
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 
+# Rende le operazioni CUDA deterministiche (a scapito di un lieve calo di performance)
 torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.benchmark = True  # Ottimizza le conv per dimensioni fisse di input
 
+# --- Pipeline di trasformazione per le immagini RGB in input ---
+# Le immagini vengono ridimensionate a 512x1024 e convertite in tensori [0, 1]
 input_transform = Compose([
     Resize((512, 1024), Image.BILINEAR),
     ToTensor(),
 ])
 
+# --- Pipeline di trasformazione per le maschere GT (ground truth) ---
+# Si usa NEAREST per non alterare i valori discreti delle etichette
 target_transform = Compose([
     Resize((512, 1024), Image.NEAREST),
 ])
 
+
 def build_eomt_model(config_path, ckpt_path, device):
+    """
+    Costruisce e carica il modello EoMT a partire da un file di configurazione YAML
+    e da un checkpoint .ckpt/.pth.
+
+    Il processo è in tre fasi:
+      1. Istanziazione dinamica dell'encoder (es. ViT) dal config.
+      2. Istanziazione dinamica della rete completa (encoder + decoder a maschere).
+      3. Caricamento dei pesi dal checkpoint, con interpolazione bilineare
+         del positional embedding se la risoluzione differisce dal training.
+
+    Args:
+        config_path: percorso al file YAML di configurazione del modello.
+        ckpt_path:   percorso al checkpoint dei pesi.
+        device:      'cuda' o 'cpu'.
+
+    Returns:
+        model: modello EoMT pronto per l'inferenza.
+    """
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
+    # Legge la dimensione immagine attesa dal config (default 640x640)
     img_size = config.get("data", {}).get("init_args", {}).get("img_size", (640, 640))
     if isinstance(img_size, int):
         img_size = (img_size, img_size)
-    num_classes = 19
+    num_classes = 19  # Numero di classi Cityscapes
 
+    # --- Istanziazione dinamica dell'encoder ---
+    # Il class_path nel YAML (es. "eomt.encoders.vit.ViT") viene splittato
+    # per importare il modulo e ottenere la classe via importlib
     encoder_cfg = config["model"]["init_args"]["network"]["init_args"]["encoder"]
     encoder_module_name, encoder_class_name = encoder_cfg["class_path"].rsplit(".", 1)
     encoder_cls = getattr(importlib.import_module(encoder_module_name), encoder_class_name)
     encoder = encoder_cls(img_size=img_size, **encoder_cfg.get("init_args", {}))
 
+    # --- Istanziazione dinamica della rete completa ---
     network_cfg = config["model"]["init_args"]["network"]
     network_module_name, network_class_name = network_cfg["class_path"].rsplit(".", 1)
     network_cls = getattr(importlib.import_module(network_module_name), network_class_name)
+    # Rimuove 'encoder' dai kwargs per evitare duplicati (già passato sopra)
     network_kwargs = {k: v for k, v in network_cfg["init_args"].items() if k != "encoder"}
     network = network_cls(
-        masked_attn_enabled=False,
+        masked_attn_enabled=False,  # Disabilita la masked attention (non necessaria in inferenza)
         num_classes=num_classes,
         encoder=encoder,
         **network_kwargs,
     )
 
+    # --- Istanziazione del Lightning Module che wrappa la rete ---
     lit_module_name, lit_class_name = config["model"]["class_path"].rsplit(".", 1)
     lit_cls = getattr(importlib.import_module(lit_module_name), lit_class_name)
     model_kwargs = {k: v for k, v in config["model"]["init_args"].items() if k != "network"}
-
     model = lit_cls(
         img_size=img_size,
         num_classes=num_classes,
@@ -79,8 +129,12 @@ def build_eomt_model(config_path, ckpt_path, device):
         **model_kwargs,
     )
 
+    # --- Caricamento dei pesi dal checkpoint ---
     state_dict = torch.load(ckpt_path, map_location=device, weights_only=False)
 
+    # Gestione del mismatch del positional embedding:
+    # se il checkpoint è stato trainato su una risoluzione diversa,
+    # il pos_embed ha shape diversa → si interpola con bicubic per adattarla
     pos_key = 'network.encoder.backbone.pos_embed'
     if pos_key in state_dict:
         ckpt_pos = state_dict[pos_key]
@@ -88,28 +142,45 @@ def build_eomt_model(config_path, ckpt_path, device):
 
         if ckpt_pos.shape != model_pos.shape:
             C = ckpt_pos.shape[-1]
+            # Ricostruisce la griglia 2D di patch dal checkpoint e dal modello corrente
             grid_ckpt = int(math.sqrt(ckpt_pos.shape[1]))
             grid_model = int(math.sqrt(model_pos.shape[1]))
 
+            # Reshaping per poter applicare F.interpolate (che opera su tensori 4D)
             ckpt_pos_2d = ckpt_pos.reshape(1, grid_ckpt, grid_ckpt, C).permute(0, 3, 1, 2)
             model_pos_2d = F.interpolate(ckpt_pos_2d, size=(grid_model, grid_model), mode='bicubic', align_corners=False)
+            # Rimette il positional embedding nella shape originale [1, num_patches, C]
             state_dict[pos_key] = model_pos_2d.permute(0, 2, 3, 1).reshape(1, grid_model * grid_model, C)
 
+    # strict=False permette di ignorare chiavi mancanti/extra nel checkpoint
     model.load_state_dict(state_dict, strict=False)
     return model
 
+
 def main():
+    """
+    Entry point principale. Gestisce:
+      - Il parsing degli argomenti da CLI.
+      - Il caricamento del modello.
+      - L'inferenza su ogni immagine del dataset.
+      - Il calcolo delle metriche AUPRC e FPR@TPR95.
+    """
     parser = ArgumentParser()
     parser.add_argument("--input", default="/home/shyam/Mask2Former/unk-eval/RoadObsticle21/images/*.webp", nargs="+")
     parser.add_argument('--ckpt_path', required=True)
     parser.add_argument('--config', required=True)
+    # Metodo post-hoc per calcolare l'anomaly score dai logit:
+    #   MSP        → 1 - max(softmax): bassa confidenza = OOD
+    #   MaxLogit   → -max(logit): logit basso = OOD
+    #   MaxEntropy → entropia della distribuzione softmax
+    #   RbA        → probabilità dell'ultima classe (classe "void/anomalia")
     parser.add_argument('--post_hoc', default="MSP", choices=["MSP", "MaxLogit", "MaxEntropy", "RbA"])
     parser.add_argument('--subset', default="val")
     parser.add_argument('--cpu', action='store_true')
     args = parser.parse_args()
 
-    anomaly_score_list = []
-    ood_gts_list = []
+    anomaly_score_list = []  # Accumula gli anomaly score pixel-wise per tutte le immagini
+    ood_gts_list = []        # Accumula le maschere GT binarizzate (0=inlier, 1=OOD)
 
     if not os.path.exists('results.txt'):
         open('results.txt', 'w').close()
@@ -122,36 +193,54 @@ def main():
     model.eval()
     print("Model LOADED successfully!")
 
+    # --- Loop principale: inferenza immagine per immagine ---
     for path in glob.glob(os.path.expanduser(str(args.input[0]))):
         print(f"Processing: {os.path.basename(path)}")
         img_tensor = input_transform((Image.open(path).convert('RGB'))).cuda()
 
+        # Il modello EoMT lavora su lista di immagini uint8
         img_uint8 = (img_tensor * 255).to(torch.uint8)
         imgs = [img_uint8]
         img_sizes = [img.shape[-2:] for img in imgs]
 
         with torch.no_grad(), torch.autocast(dtype=torch.float16, device_type="cuda"):
+            # Divide l'immagine in crops (finestre) e ne salva le coordinate di origine
             crops, origins = model.window_imgs_semantic(imgs)
+            # Forward pass: restituisce logit di maschera e logit di classe per ogni layer
             mask_logits_per_layer, class_logits_per_layer = model(crops)
 
+            # Usa solo l'output dell'ultimo layer del decoder.
+            # IMPORTANTE: si interpola alle dimensioni dei crops (640x640), NON dell'immagine
+            # originale, per mantenere la consistenza con la pipeline di windowing del modello.
             mask_logits = F.interpolate(mask_logits_per_layer[-1], crops.shape[-2:], mode="bilinear", align_corners=False)
             class_logits = class_logits_per_layer[-1]
 
+            # Combina mask logit e class logit → logit per-pixel per ogni classe
             crop_logits = model.to_per_pixel_logits_semantic(mask_logits, class_logits)
+            # Riassembla i crops nella risoluzione originale dell'immagine
             logits = model.revert_window_logits_semantic(crop_logits, origins, img_sizes)[0]
 
+            # Calcola le probabilità softmax per ogni pixel e classe
             probs = F.softmax(logits, dim=0)
 
+            # --- Calcolo dell'anomaly score in base al metodo scelto ---
             if args.post_hoc == "MSP":
+                # Maximum Softmax Probability: score alto = bassa confidenza = probabile anomalia
                 anomaly_result = 1.0 - probs.max(dim=0)[0].cpu().numpy()
             elif args.post_hoc == "MaxLogit":
+                # Logit massimo negato: logit basso suggerisce OOD
                 anomaly_result = -logits.max(dim=0)[0].cpu().numpy()
             elif args.post_hoc == "MaxEntropy":
+                # Entropia della distribuzione: alta entropia = incertezza = OOD
                 anomaly_result = -torch.sum(probs * torch.log(probs + 1e-8), dim=0).cpu().numpy()
             elif args.post_hoc == "RbA":
+                # Reject by Anomaly: usa la probabilità della classe "void" come score
                 anomaly_result = probs[-1, :, :].cpu().numpy()
 
+        # --- Caricamento della maschera GT corrispondente ---
+        # Il percorso GT si ottiene sostituendo "images" con "labels_masks"
         pathGT = path.replace("images", "labels_masks")
+        # Adatta l'estensione in base al dataset
         if "RoadObsticle21" in pathGT:
            pathGT = pathGT.replace("webp", "png")
         if "fs_static" in pathGT:
@@ -163,23 +252,27 @@ def main():
         mask = target_transform(mask)
         ood_gts = np.array(mask)
 
+        # --- Binarizzazione delle etichette GT in base al dataset ---
+        # Ogni dataset usa convenzioni diverse per le etichette OOD
         if "RoadAnomaly" in pathGT:
-             ood_gts = np.where((ood_gts==2), 1, ood_gts)
+             ood_gts = np.where((ood_gts==2), 1, ood_gts)        # classe 2 → OOD
         if "LostAndFound" in pathGT:
-             ood_gts = np.where((ood_gts==0), 255, ood_gts)
-             ood_gts = np.where((ood_gts==1), 0, ood_gts)
-             ood_gts = np.where((ood_gts>1)&(ood_gts<201), 1, ood_gts)
+             ood_gts = np.where((ood_gts==0), 255, ood_gts)      # 0 → ignora
+             ood_gts = np.where((ood_gts==1), 0, ood_gts)        # 1 → inlier
+             ood_gts = np.where((ood_gts>1)&(ood_gts<201), 1, ood_gts)  # 2-200 → OOD
         if "Streethazard" in pathGT:
-             ood_gts = np.where((ood_gts==14), 255, ood_gts)
-             ood_gts = np.where((ood_gts<20), 0, ood_gts)
-             ood_gts = np.where((ood_gts==255), 1, ood_gts)
+             ood_gts = np.where((ood_gts==14), 255, ood_gts)     # 14 → ignora
+             ood_gts = np.where((ood_gts<20), 0, ood_gts)        # <20 → inlier
+             ood_gts = np.where((ood_gts==255), 1, ood_gts)      # 255 → OOD
 
+        # Salta l'immagine se non contiene pixel OOD (nessun 1 nella GT)
         if 1 not in np.unique(ood_gts):
             continue
         else:
              ood_gts_list.append(ood_gts)
              anomaly_score_list.append(anomaly_result)
 
+        # Libera la memoria GPU dopo ogni immagine
         del mask_logits_per_layer, class_logits_per_layer, logits, anomaly_result, ood_gts, mask
         torch.cuda.empty_cache()
 
@@ -189,28 +282,34 @@ def main():
         print("Nessuna immagine valida trovata per il calcolo delle metriche.")
         return
 
+    # --- Calcolo finale delle metriche su tutto il dataset ---
     ood_gts = np.array(ood_gts_list)
     anomaly_scores = np.array(anomaly_score_list)
 
+    # Separa i pixel OOD (1) da quelli in-distribution (0)
     ood_mask = (ood_gts == 1)
     ind_mask = (ood_gts == 0)
 
     ood_out = anomaly_scores[ood_mask]
     ind_out = anomaly_scores[ind_mask]
 
+    # Crea le etichette binarie: 1=OOD, 0=inlier
     ood_label = np.ones(len(ood_out))
     ind_label = np.zeros(len(ind_out))
 
     val_out = np.concatenate((ind_out, ood_out))
     val_label = np.concatenate((ind_label, ood_label))
 
+    # AUPRC: Area Under the Precision-Recall Curve (robusta allo sbilanciamento delle classi)
     prc_auc = average_precision_score(val_label, val_out)
+    # FPR@95TPR: tasso di falsi positivi al 95% di true positive rate
     fpr = fpr_at_95_tpr(val_out, val_label)
 
     print(f'Method: {args.post_hoc} | AUPRC score: {prc_auc*100.0:.2f} | FPR@TPR95: {fpr*100.0:.2f}')
 
     file.write((f'Method: {args.post_hoc} | AUPRC score: {prc_auc*100.0:.2f} | FPR@TPR95: {fpr*100.0:.2f}'))
     file.close()
+
 
 if __name__ == '__main__':
     main()
