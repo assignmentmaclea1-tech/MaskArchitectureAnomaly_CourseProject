@@ -25,7 +25,7 @@ import torch
 from PIL import Image
 from torchvision.transforms import Compose, Resize, ToTensor
 
-from evalAnomaly_eomt import build_eomt_model, per_pixel_maps
+from evalAnomaly_eomt import build_eomt_model
 from iouEval import iouEval, getColorEntry
 
 NUM_CLASSES = 20  # 19 classi Cityscapes + 1 ignore
