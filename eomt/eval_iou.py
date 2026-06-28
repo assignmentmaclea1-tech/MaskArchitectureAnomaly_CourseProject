@@ -1,4 +1,3 @@
-'''
 # Code to calculate IoU (mean and per-class) in a dataset
 # Nov 2017
 # Eduardo Romera
@@ -410,3 +409,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
