@@ -4,9 +4,9 @@ This is almost the original repository of the authors of EoMT if something is no
 
 ## Requirements Installation
 All the requirements installation are provided in the requirements.txt file. To install it, set the current directory appropriately and then use the command:
-'''
+```
 !pip install -r requirements.txt
-'''
+```
 ## EVALUATING PART
 ## evalAnomaly_eomt.py
 
