@@ -36,7 +36,23 @@ This code calculates the mIoU for the EoMT model on the CityScapes dataset with 
   --temperature 0.75
 
   ```
-* The values for temperature are 0.5, 0.75, 1.0, 1.1
+* Change the paths accordingly. The values for temperature are 0.5, 0.75, 1.0, 1.1
+
+## evalAnomaly_eomt_temp.py
+This file performs the MSP post-hoc method (and all other methods adopted for EoMT) on the Anomaly Validation Datasest used in evalAnomaly.py and evalAnomaly_eomt.py. The key feature here is the implementation of the Temperature Scaling, a calibration technique especially for semantic segmentation tasks.
+
+**Examples of Inference Command:**
+  ```
+  %cd /content/MaskArchitectureAnomaly_CourseProject/eomt
+
+  !python evalAnomaly_eomt_temp.py \
+    --input "/content/drive/MyDrive/Validation_Dataset/RoadAnomaly21/images/*.png" \
+    --ckpt_path "/content/drive/MyDrive/eomt_cityscapes.bin" \
+    --config "/content/MaskArchitectureAnomaly_CourseProject/eomt/configs/dinov2/cityscapes/semantic/eomt_base_640.yaml" \
+    --post_hoc "MSP" \
+    --temperature 1.0
+  ```
+* Change the paths accordingly. The values for temperature are 0.5, 0.75, 1.0, 1.1
 
 ## Project Extension Part
 In this part, file mask_classification_loss was updated to deal with the Logit Normalization Loss (the original file is still in the folder \training\ under the name mask_classification_loss_ORIGINAL.py). For evaluating, access the right directory and run the following command:
