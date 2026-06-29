@@ -214,8 +214,5 @@ def main():
 
     print(f'Method: {args.post_hoc} | AUPRC score: {prc_auc*100.0:.2f} | FPR@TPR95: {fpr*100.0:.2f}')
 
-    file.write((f'Method: {args.post_hoc} | AUPRC score: {prc_auc*100.0:.2f} | FPR@TPR95: {fpr*100.0:.2f}'))
-    file.close()
-
 if __name__ == '__main__':
     main()
