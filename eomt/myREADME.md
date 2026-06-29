@@ -40,12 +40,12 @@ This code calculates the mIoU for the EoMT model on the CityScapes dataset with 
 
 ## Project Extension Part
 In this part, file mask_classification_loss was updated to deal with the Logit Normalization Loss (the original file is still in the folder \training\ under the name mask_classification_loss_ORIGINAL.py). For evaluating, access the right directory and run the following command:
-'''
+```
 !python main.py fit \
 --config configs/dinov2/cityscapes/semantic/eomt_base_640.yaml \
 --data.path /content \
 --data.init_args.num_workers 0 \
 --data.init_args.batch_size 1 \
 --ckpt_path (if needed)
-'''
+```
 * Change the paths accordingly.
