@@ -180,6 +180,7 @@ def main():
         img_sizes = [img_uint8.shape[-2:]]
     
         crops, origins = model.window_imgs_semantic(imgs)
+        crops = crops.to(device)
         S, L = per_pixel_maps(model, crops, origins, img_sizes, args.temperature)
     
         print(f"S shape: {S.shape}")
