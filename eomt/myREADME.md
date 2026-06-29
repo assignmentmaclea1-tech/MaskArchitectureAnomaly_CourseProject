@@ -16,7 +16,7 @@ This code adapt evalAnomaly.py in the \eval\ folder to use EoMT pretrained model
 
 ## eval_iou.py
 
-This code calculates the predicted mIoU for the EoMT model on the CityScapes dataset with respect of different values of temperature.
+This code calculates the mIoU for the EoMT model on the CityScapes dataset with respect of different values of temperature.
 
 **Examples of Inference Command:**
   ```
