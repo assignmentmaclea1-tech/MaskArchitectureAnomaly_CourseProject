@@ -42,5 +42,5 @@ This code is based on the previous evalAnomaly_original.py. The key change here 
   --loadWeights "erfnet_pretrained.pth" \
   --post_hoc "MSP"
   ```
-* Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy".
+* Change the paths accordingly. The available post-methods are: "MSP", "MaxLogit", "MaxEntropy".
 
