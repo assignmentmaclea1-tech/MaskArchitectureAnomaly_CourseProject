@@ -10,7 +10,7 @@ All the requirements installation are provided in the requirements.txt file. To 
 ## EVALUATING PART
 ## evalAnomaly_eomt.py
 
-This code adapt evalAnomaly.py in the \eval\ folder to use EoMT pretrained model. The weights for this pretrained model can be downloaded [here](https://drive.google.com/file/d/1Xrglbc8y2izbQjUDmJASTegNWKAotXNp/view?usp=sharing)
+This code adapt evalAnomaly.py in the \eval\ folder to use EoMT pretrained model. The weights for this pretrained model can be downloaded [here](https://drive.google.com/file/d/1Xrglbc8y2izbQjUDmJASTegNWKAotXNp/view?usp=sharing). The results are presented in results.txt in \eval folder.
 
 **Examples of Inference Command:**
   ```
