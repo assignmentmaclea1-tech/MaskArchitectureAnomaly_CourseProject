@@ -14,18 +14,17 @@ This code adapt evalAnomaly.py in the \eval\ folder to use EoMT pretrained model
   ```
 * Change the paths accordingly. The post-methods available are: "MSP", "MaxLogit", "MaxEntropy", "RbA".
 
+## eval_iou.py
 
-## evalAnomaly_temp.py
-
-This code adapt evalAnomaly.py to perform Temperature Scaling. The post-hoc method is "MSP"
+This code calculates the predicted mIoU for the EoMT model on the CityScapes dataset with respect of different values of temperature.
 
 **Examples of Inference Command:**
   ```
-  python evalAnomaly_temp.py \
-  --input "/content/drive/MyDrive/Anomaly_Validation_Datasets/Validation_Dataset/RoadAnomaly/images/*.jpg" \
-  --loadDir "/content/drive/MyDrive/MaskArchitectureAnomaly_CourseProject-main/trained_models/" \
-  --loadWeights "erfnet_pretrained.pth" \
-  --post_hoc "MSP" \
+  !python eval_iou.py \
+  --input "/content/cityscapes/leftImg8bit/val" \
+  --gt_dir "/content/cityscapes/gtFine/val" \
+  --ckpt_path "/content/drive/MyDrive/eomt_cityscapes.bin" \
+  --config "/content/MaskArchitectureAnomaly_CourseProject/eomt/configs/dinov2/cityscapes/semantic/eomt_base_640.yaml" \
   --temperature 0.75
 
   ```
