@@ -39,7 +39,7 @@ This code calculates the mIoU for the EoMT model on the CityScapes dataset with 
 * Change the paths accordingly. The values for temperature are 0.5, 0.75, 1.0, 1.1
 
 ## evalAnomaly_eomt_temp.py
-This file performs the MSP post-hoc method (and all other methods adopted for EoMT) on the Anomaly Validation Datasest used in evalAnomaly.py and evalAnomaly_eomt.py. The key feature here is the implementation of the Temperature Scaling, a calibration technique especially for semantic segmentation tasks.
+This file performs the MSP post-hoc method (and all other methods adopted for EoMT) on the Anomaly Validation Datasest used in evalAnomaly.py and evalAnomaly_eomt.py (the dataset is [here](https://drive.google.com/file/d/1zcayoIIJztxKuHOIjmSjGoQBDy4RdETr/view?usp=drive_link)). The key feature here is the implementation of the Temperature Scaling, a calibration technique especially for semantic segmentation tasks.
 
 **Examples of Inference Command:**
   ```
