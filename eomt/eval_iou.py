@@ -1,4 +1,3 @@
-# iouEval_eomt.py
 # Calcola IoU (mean e per-class) su un dataset custom usando EoMT.
 # La temperatura viene passata direttamente a per_pixel_maps,
 # che la applica ai logit di classe prima del softmax.
@@ -37,18 +36,50 @@ NUM_CLASSES = 20  # 19 classi Cityscapes + 1 ignore
 # Si aspetta che immagine e maschera abbiano lo stesso nome file,
 # con estensioni potenzialmente diverse (es. .png / .png).
 # ============================================================================
+# Rimappatura da ID originali Cityscapes (0-33) alle 19 classi training.
+# Tutti gli ID non presenti nella lista vengono mappati a 255 (ignore).
+CITYSCAPES_ID_TO_TRAIN = {
+    7:  0,   # road
+    8:  1,   # sidewalk
+    11: 2,   # building
+    12: 3,   # wall
+    13: 4,   # fence
+    17: 5,   # pole
+    19: 6,   # traffic light
+    20: 7,   # traffic sign
+    21: 8,   # vegetation
+    22: 9,   # terrain
+    23: 10,  # sky
+    24: 11,  # person
+    25: 12,  # rider
+    26: 13,  # car
+    27: 14,  # truck
+    28: 15,  # bus
+    31: 16,  # train
+    32: 17,  # motorcycle
+    33: 18,  # bicycle
+}
+
 class SegmentationDataset(torch.utils.data.Dataset):
     """
-    Dataset minimale per segmentazione semantica.
-    Cerca le immagini in img_dir e le maschere GT in gt_dir,
-    abbinandole per nome file (senza estensione).
+    Dataset per Cityscapes val set.
+    Cerca le immagini ricorsivamente nelle sottocartelle per città,
+    abbina ogni immagine alla sua maschera GT tramite il nome base,
+    e rimappa le etichette originali (0-33) alle 19 classi training.
     """
     def __init__(self, img_dir, gt_dir, img_size=(512, 1024)):
-        self.img_paths = sorted(glob.glob(os.path.join(img_dir, "*.*")))
+        # Cityscapes ha sottocartelle per città: serve recursive=True
+        self.img_paths = sorted(glob.glob(
+            os.path.join(img_dir, "**", "*_leftImg8bit.png"), recursive=True
+        ))
         self.gt_dir = gt_dir
         self.img_size = img_size
 
-        # Trasformazione immagine: resize + conversione in tensore float [0,1]
+        # Tabella di rimappatura: array di 256 elementi, default 19 (ignore)
+        self.id_to_train = np.full(256, 19, dtype=np.int64)
+        for cityscapes_id, train_id in CITYSCAPES_ID_TO_TRAIN.items():
+            self.id_to_train[cityscapes_id] = train_id
+
         self.img_transform = Compose([
             Resize(img_size, Image.BILINEAR),
             ToTensor(),
@@ -59,27 +90,32 @@ class SegmentationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         img_path = self.img_paths[idx]
-        filename = os.path.splitext(os.path.basename(img_path))[0]
+
+        # Il nome base senza suffisso, es. "aachen_000000_000019"
+        basename = os.path.basename(img_path).replace("_leftImg8bit.png", "")
+        city = os.path.basename(os.path.dirname(img_path))
 
         # Carica immagine RGB
         img = Image.open(img_path).convert("RGB")
         img_tensor = self.img_transform(img)  # [3, H, W] float [0,1]
 
-        # Cerca la maschera GT con lo stesso nome (qualsiasi estensione)
-        gt_candidates = glob.glob(os.path.join(self.gt_dir, filename + ".*"))
-        if len(gt_candidates) == 0:
-            raise FileNotFoundError(f"Maschera GT non trovata per: {filename}")
-        gt_path = gt_candidates[0]
+        # Costruisce il percorso GT: stessa struttura per città
+        gt_path = os.path.join(
+            self.gt_dir, city, f"{basename}_gtFine_labelIds.png"
+        )
+        if not os.path.exists(gt_path):
+            raise FileNotFoundError(f"Maschera GT non trovata: {gt_path}")
 
-        # Carica GT: resize con NEAREST per non alterare le etichette
+        # Carica GT con NEAREST per non alterare i valori discreti
         gt = Image.open(gt_path)
         gt = gt.resize((self.img_size[1], self.img_size[0]), Image.NEAREST)
-        gt_tensor = torch.from_numpy(np.array(gt)).long()  # [H, W]
+        gt_np = np.array(gt, dtype=np.int64)
 
-        # Rimappa etichetta 255 (ignore) a 19
-        gt_tensor[gt_tensor == 255] = 19
+        # Rimappa gli ID originali (0-33) alle 19 classi training
+        # Tutti gli ID non nella tabella diventano 19 (ignore)
+        gt_tensor = torch.from_numpy(self.id_to_train[gt_np]).long()
 
-        return img_tensor, gt_tensor, filename
+        return img_tensor, gt_tensor, basename
 
 
 def per_pixel_maps(model, crops, origins, img_sizes, temperature):
@@ -170,11 +206,13 @@ def main():
     start = time.time()
 
     for img_tensor, gt_tensor, filename in loader:
+        '''
         print(f"Immagine: {filename[0]}")
         print(f"img_tensor shape: {img_tensor.shape}")
         print(f"gt_tensor shape: {gt_tensor.shape}")
         print(f"GT valori unici: {gt_tensor.unique()}")
-    
+        '''
+
         img_uint8 = (img_tensor.squeeze(0) * 255).to(torch.uint8).to(device)
         imgs = [img_uint8]
         img_sizes = [img_uint8.shape[-2:]]
@@ -183,15 +221,15 @@ def main():
         crops = crops.to(device)
         S, L = per_pixel_maps(model, crops, origins, img_sizes, args.temperature)
     
-        print(f"S shape: {S.shape}")
-        print(f"S valori unici (primi 5): {S.unique()[:5]}")
+        #print(f"S shape: {S.shape}")
+        #print(f"S valori unici (primi 5): {S.unique()[:5]}")
     
         pred = S.argmax(dim=0).unsqueeze(0).unsqueeze(0)
-        print(f"pred shape: {pred.shape}")
-        print(f"pred valori unici: {pred.unique()}")
+        #print(f"pred shape: {pred.shape}")
+        #print(f"pred valori unici: {pred.unique()}")
     
         gt = gt_tensor.unsqueeze(1).to(device)
-        print(f"gt shape: {gt.shape}")
+        #print(f"gt shape: {gt.shape}")
     
         iouEvalVal.addBatch(pred.data, gt.data)
 
