@@ -26,11 +26,6 @@ class MaskClassificationLoss(Mask2FormerLoss):
         num_labels: int,
         no_object_coefficient: float,
     ):
-        # Si inizializza direttamente nn.Module invece di chiamare super().__init__()
-        # di Mask2FormerLoss: questo è intenzionale per evitare che il costruttore
-        # padre sovrascriva parametri che qui vengono ridefiniti manualmente
-        # (es. empty_weight, matcher). È una scelta fragile: se Mask2FormerLoss
-        # aggiunge logica nel __init__ in futuro, qui verrebbe silenziosamente ignorata.
         nn.Module.__init__(self)
 
         self.num_points = num_points
@@ -52,9 +47,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
 
         # tau è il parametro centrale di LogitNorm: valori piccoli (es. 0.04)
         # producono logits normalizzati con norma ~1/tau = 25, forzando il modello
-        # ad essere molto "deciso" durante il training. Questo è diverso dal
-        # Temperature Scaling in inference (evalAnomaly_eomt_temp.py): qui tau
-        # agisce sulla loss durante il training, non sulle probabilità a test time.
+        # ad essere molto "deciso" durante il training.
         self.tau = 0.04
 
         self.matcher = Mask2FormerHungarianMatcher(
@@ -66,7 +59,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
 
     @torch.compiler.disable
     # Il decorator disabilita torch.compile su questo metodo: necessario perché
-    # il Hungarian Matcher interno usa operazioni non tracciabili dal compilatore
+    # Hungarian Matcher interno usa operazioni non tracciabili dal compilatore
     # (es. scipy linear_sum_assignment o loop Python dinamici).
     def forward(
         self,
@@ -97,18 +90,21 @@ class MaskClassificationLoss(Mask2FormerLoss):
         return {**loss_masks, **loss_classes}
 
     def loss_labels(self, class_queries_logits, class_labels, indices):
+        
         # Cuore di LogitNorm: normalizza ogni vettore di logits sulla sfera unitaria
         # e poi divide per tau. L'effetto geometrico è che tutti i vettori di logits
         # vengono proiettati sulla stessa ipersfera di raggio 1/tau, indipendentemente
         # dalla loro norma originale. Questo impedisce al modello di "barare" sulla
         # loss aumentando semplicemente la norma dei logits invece di imparare
         # feature discriminative. Il +1e-7 evita divisione per zero.
+        
         norms = torch.norm(class_queries_logits, p=2, dim=-1, keepdim=True) + 1e-7
         normalized_logits = (class_queries_logits / norms) / self.tau
 
         # Print di debug: utile durante lo sviluppo per verificare che la norma
         # media post-normalizzazione sia circa 1/tau = 25. Da rimuovere in produzione
-        # perché chiamato ad ogni forward pass, con impatto non trascurabile su I/O.
+        # perché chiamato ad ogni forward pass.
+        
         print(f"[LOGITNORM ATTIVO] tau={self.tau}, norm_media={normalized_logits.norm(dim=-1).mean():.2f}")
 
         return super().loss_labels(normalized_logits, class_labels, indices)
@@ -119,6 +115,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
         # Normalizzazione per numero di maschere totali nel batch: senza questo,
         # la loss crescerebbe linearmente con il numero di oggetti per immagine,
         # rendendo il gradiente instabile con batch di densità variabile.
+        
         num_masks = sum(len(tgt) for (_, tgt) in indices)
         num_masks_tensor = torch.as_tensor(
             num_masks, dtype=torch.float, device=masks_queries_logits.device
@@ -128,6 +125,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
         # del batch. all_reduce somma num_masks tra tutti i processi e si divide
         # per world_size, ottenendo la media globale. Senza questo, la loss
         # sarebbe inconsistente tra GPU con numero diverso di oggetti nel proprio shard.
+        
         if dist.is_available() and dist.is_initialized():
             dist.all_reduce(num_masks_tensor)
             world_size = dist.get_world_size()
@@ -142,9 +140,11 @@ class MaskClassificationLoss(Mask2FormerLoss):
         return loss_masks
 
     def loss_total(self, losses_all_layers, log_fn) -> torch.Tensor:
+        
         # Mask2Former produce predizioni a più layer del decoder (auxiliary losses):
         # losses_all_layers contiene le loss di tutti i layer, non solo dell'ultimo.
         # Sommarle pesate stabilizza il training guidando anche i layer intermedi.
+        
         loss_total = None
         for loss_key, loss in losses_all_layers.items():
             log_fn(f"losses/train_{loss_key}", loss, sync_dist=True)
@@ -153,6 +153,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
             # - mask: BCE sulla maschera binaria predetta vs GT
             # - dice: Dice loss sulla maschera (più robusta allo sbilanciamento)
             # - cross_entropy: classificazione della query matchata
+            
             if "mask" in loss_key:
                 weighted_loss = loss * self.mask_coefficient
             elif "dice" in loss_key:
