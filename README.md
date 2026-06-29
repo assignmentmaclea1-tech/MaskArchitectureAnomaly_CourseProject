@@ -15,5 +15,6 @@ For instructions, please refer to the README in each folder:
 * Il README di eval è stato modificato. Il resto è pressochè identico.
 * Ho creato appositi file _eval.py utili per punto 4,5 senza sovrascivere originali (anzi, quello originale è stato rinominato)
 * In trained_models non sono presenti i pesi per EoMT "eomt_cityscapes.bin", ho lasciato un link nel README.md di eval per poterli scaricare.
-*commentare mask_classification_loss.py e file eval_IoU.py per EoMT
-*Runnare codice su maclea4 su maclea1 per parte di Eval (ho bisogno del dataset completo)
+* commentare mask_classification_loss.py e file eval_IoU.py per EoMT
+* codice corretto per eval su maclea4.
+* eliminare i file di prova incompiuti
