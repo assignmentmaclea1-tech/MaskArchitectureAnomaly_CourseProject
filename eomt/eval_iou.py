@@ -158,12 +158,13 @@ def main():
 
     # Carica il modello EoMT con i pesi locali
     model = build_eomt_model(args.config, args.ckpt_path, device)
+    model = model.cuda()
     model.eval()
     print("Modello caricato con successo.")
 
     # Dataset e DataLoader (batch_size=1 perché le immagini possono avere risoluzioni diverse)
     dataset = SegmentationDataset(args.input, args.gt_dir)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
 
     iouEvalVal = iouEval(NUM_CLASSES)
     start = time.time()
@@ -192,7 +193,6 @@ def main():
         print(f"gt shape: {gt.shape}")
     
         iouEvalVal.addBatch(pred.data, gt.data)
-        break  # processa solo la prima immagine per il debug
 
         del S, L, crops
         if device == "cuda":
