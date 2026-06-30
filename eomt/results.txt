@@ -4,64 +4,85 @@ Dataset: SMIYC RA-21, SMIYC RO-21, FS L&F,  FS Static, Road Anomaly
 Metrics: AuPRC, FPR95
 
 SMIYC RA-21:{
-  ErfNet:{
+  EoMT:{
     MSP(T=1.0):{
-      AuPRC: 29.10
-      FPR95: 62.55
+      AuPRC: 66.26
+      FPR95: 19.83
     }
     MSP(T=0.5):{
-      AuPRC: 27.06
-      FPR95: 62.73
+      AuPRC: 66.16
+      FPR95: 19.85
     }
     MSP(T=0.75):{
-      AuPRC: 28.16
-      FPR95: 62.49
+      AuPRC: 66.21
+      FPR95: 19.83
     }
     MSP(T=1.1){
-      AuPRC: 29.40
-      FPR95: 62.65
+      AuPRC: 66.28
+      FPR95: 19.82
     }
   }
 }
 
 SMIYC RO-21:{
-  ErfNet:{
+  EoMT:{
     MSP(T=1.0):{
-      AuPRC: 2.71
-      FPR95: 65.22
+      AuPRC: 83.34
+      FPR95: 6.78
     }
     MSP(T=0.5):{
-      AuPRC: 2.42
-      FPR95: 63.23
+      AuPRC: 83.35
+      FPR95: 6.78
     }
     MSP(T=0.75):{
-      AuPRC: 2.57
-      FPR95: 66.13
+      AuPRC: 83.34
+      FPR95: 6.78
     }
     MSP(T=1.1){
-      AuPRC: 2.76
-      FPR95: 65.37
+      AuPRC: 83.34
+      FPR95: 6.78
     }
   }
 }
 
 FS L&F:{
-  ErfNet:{
+  EoMT:{
     MSP(T=1.0):{
-      AuPRC: 1.75
-      FPR95: 50.59
+      AuPRC: 17.47
+      FPR95: 14.33
     }
     MSP(T=0.5):{
-      AuPRC: 1.28
-      FPR95: 66.74
+      AuPRC: 17.46
+      FPR95: 14.50
     }
     MSP(T=0.75):{
-      AuPRC: 1.49
-      FPR95: 51.76
+      AuPRC: 17.46
+      FPR95: 14.34
     }
     MSP(T=1.1){
-      AuPRC: 1.86
-      FPR95: 50.18
+      AuPRC: 17.46
+      FPR95: 14.33
+    }
+  }
+}
+
+FS Static:{
+  EoMT:{
+    MSP(T=1.0):{
+      AuPRC: 61.16
+      FPR95: 33.28
+    }
+    MSP(T=0.5):{
+      AuPRC: 61.15
+      FPR95: 33.27
+    }
+    MSP(T=0.75):{
+      AuPRC: 61.16
+      FPR95: 33.28
+    }
+    MSP(T=1.1){
+      AuPRC: 61.16
+      FPR95: 33.30
     }
   }
 }
@@ -69,41 +90,20 @@ FS L&F:{
 FS Static:{
   ErfNet:{
     MSP(T=1.0):{
-      AuPRC: 7.47
-      FPR95: 41.84
+      AuPRC: 66.82
+      FPR95: 25.33
     }
     MSP(T=0.5):{
-      AuPRC: 6.60
-      FPR95: 43.48
+      AuPRC: 66.67
+      FPR95: 25.33
     }
     MSP(T=0.75):{
-      AuPRC: 6.99
-      FPR95: 42.50
+      AuPRC: 66.76
+      FPR95: 25.34
     }
     MSP(T=1.1){
-      AuPRC: 7.69
-      FPR95: 41.62
-    }
-  }
-}
-
-FS Static:{
-  ErfNet:{
-    MSP(T=1.0):{
-      AuPRC: 12.42
-      FPR95: 82.58
-    }
-    MSP(T=0.5):{
-      AuPRC: 12.19
-      FPR95: 82.02
-    }
-    MSP(T=0.75):{
-      AuPRC: 12.32
-      FPR95: 82.31
-    }
-    MSP(T=1.1){
-      AuPRC: 12.46
-      FPR95: 82.73
+      AuPRC: 66.84
+      FPR95: 25.33
     }
   }
 }
