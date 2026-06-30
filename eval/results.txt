@@ -91,19 +91,19 @@ FS L&F:{
   EoMT:{
     MSP:{
       AuPRC: 17.97
-      FPR95: 43.33
+      FPR95: 14.33
     }
     MaxLogit:{
       AuPRC: 17.47
-      FPR95: 44.10
+      FPR95: 14.10
     }
     MaxEntropy:{
       AuPRC: 19.23
-      FPR95: 41.15
+      FPR95: 14.15
     }
     RbA:{
       AuPRC: 13.57
-      FRP95: 54.12
+      FRP95: 14.12
     }
   }
 }
