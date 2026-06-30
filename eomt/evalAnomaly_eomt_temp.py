@@ -283,8 +283,6 @@ def main():
     val_out = np.concatenate((ind_out, ood_out))
     val_label = np.concatenate((ind_label, ood_label))
 
-    # AUPRC è preferibile ad AUROC per dataset sbilanciati (pixel OOD << pixel ID),
-    # perché non è influenzata dalla grande quantità di veri negativi (in-dist).
     prc_auc = average_precision_score(val_label, val_out)
     fpr = fpr_at_95_tpr(val_out, val_label)
 
