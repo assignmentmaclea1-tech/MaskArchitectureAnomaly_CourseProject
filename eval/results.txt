@@ -1,3 +1,5 @@
+# This file was created to make a comparison between ERFNet and EoMT models evaluation on different datasets with respect to different    # post-hoc methods and metrics.
+
 model:Erfnet, EoMT
 post_hoc method: MSP, MaxLogit, MaxEntropy, RbA (only for EoMT)
 Dataset: SMIYC RA-21, SMIYC RO-21, FS L&F,  FS Static, Road Anomaly
