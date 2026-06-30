@@ -212,13 +212,32 @@ def main():
         print(f"gt_tensor shape: {gt_tensor.shape}")
         print(f"GT valori unici: {gt_tensor.unique()}")
         '''
-
+        # Rimuove la dimensione del batch (batch_size = 1),
+        # converte i valori dell'immagine da [0,1] a [0,255],
+        # cambia il tipo in uint8 e sposta il tensore sul dispositivo
+        # (CPU o GPU).
         img_uint8 = (img_tensor.squeeze(0) * 255).to(torch.uint8).to(device)
+
+        # Inserisce l'immagine in una lista, poiché le funzioni
+        # successive si aspettano una lista di immagini.
         imgs = [img_uint8]
+    
+        # Salva le dimensioni originali dell'immagine (altezza, larghezza).
+        # Serviranno successivamente per ricostruire la mappa finale.
         img_sizes = [img_uint8.shape[-2:]]
     
+        # Divide l'immagine in finestre (crop/patch) utilizzando
+        # la funzione del modello.
+        #
+        # crops: contiene tutte le patch estratte.
+        # origins: contiene le coordinate (origine) di ciascuna patch
+        #          nell'immagine originale.
         crops, origins = model.window_imgs_semantic(imgs)
+
+        # Sposta tutte le patch sulla GPU (o sul dispositivo scelto).
         crops = crops.to(device)
+            
+        
         S, L = per_pixel_maps(model, crops, origins, img_sizes, args.temperature)
     
         #print(f"S shape: {S.shape}")
