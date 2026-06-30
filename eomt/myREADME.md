@@ -55,7 +55,7 @@ This file performs the MSP post-hoc method (and all other methods adopted for Eo
 * Change the paths accordingly. The values for temperature are 0.5, 0.75, 1.0, 1.1
 
 ## Project Extension Part
-In this part, file mask_classification_loss was updated to deal with the Logit Normalization Loss (the original file is still in the folder \training\ under the name mask_classification_loss_ORIGINAL.py). For evaluating, access the right directory and run the following command:
+In this part, file mask_classification_loss was updated to deal with the Logit Normalization Loss (the original file is still in the folder \training\ under the name mask_classification_loss_ORIGINAL.py). For evaluating, set the right directory and run the following command:
 ```
 !python main.py fit \
 --config configs/dinov2/cityscapes/semantic/eomt_base_640.yaml \
